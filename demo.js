@@ -133,6 +133,20 @@ catch (error) {
   }
 }
 
+// create: 1-to-1
+
+// create: 1-to-m
+
+// read: one
+
+// read: many
+
+// update: one
+
+// update: many
+
+// delete
+
 
 //oneToone();
 //oneTom();
