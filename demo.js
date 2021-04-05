@@ -5,6 +5,9 @@ const db = new Sequelize({
   storage: 'mydb.sqlite'
 });
 
+// ASSOCIATIONS ////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
 // 1 to 1
 async function oneToone() {
 try {
@@ -76,6 +79,10 @@ catch (error) {
   console.error('Unable to connect to the database:', error);
   }
 }
+
+
+// MAGIC METHODS /////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 // create: m to m
 async function createMtoM() {
@@ -215,7 +222,7 @@ try {
   plot1.addVegetable(pea)
   plot1.addVegetable(carrot)
 
-  const newGardener = await plot1.save() 
+  const newPlot = await plot1.save() 
 
   await db.sync();
   await db.close();
@@ -225,9 +232,111 @@ catch (error) {
   }
 }
 
-// read: one
+// create: create in bulk
+async function createBulkItems() {
+try {
+  
+  const Vegetable = db.define('vegetable', {
+    name: {type: Sequelize.STRING}
+  })
+  const Plot = db.define('plot', {
+    name: {type: Sequelize.STRING}
+  })
 
-// read: many
+
+  Plot.hasMany(Vegetable) 
+  Vegetable.belongsTo(Plot)
+
+  // Create and save tables
+  await db.authenticate();
+  console.log('Connection has been established successfully.');
+  await db.sync({force: true, logging: true});
+
+  // Create items
+  const [plot1, wasCreated1] = await Plot.findOrCreate({
+  where: {
+    name: 'gardener1'
+  }
+  })
+  const [pea, wasCreated2] = await Vegetable.findOrCreate({
+  where: {
+    name: 'pea'
+  }
+  })
+  const [carrot, wasCreated3] = await Vegetable.findOrCreate({
+  where: {
+    name: 'carrot'
+  }
+  })
+
+  plot1.addVegetable(pea)
+  plot1.addVegetable(carrot)
+
+  const newPlot = await plot1.save() 
+
+  await db.sync();
+  await db.close();
+} 
+catch (error) {
+  console.error('Unable to connect to the database:', error);
+  }
+}
+
+// read: findAll
+async function readFindAll() {
+try {
+  
+  const Vegetable = db.define('vegetable', {
+    name: {type: Sequelize.STRING}
+  })
+  const Plot = db.define('plot', {
+    name: {type: Sequelize.STRING}
+  })
+
+
+  Plot.hasMany(Vegetable) 
+  Vegetable.belongsTo(Plot)
+
+  await db.authenticate();
+  console.log('Connection has been established successfully.');
+  await db.sync({force: true, logging: true});
+
+  // Create items
+  const [plot1, wasCreated1] = await Plot.findOrCreate({
+  where: {
+    name: 'gardener1'
+  }
+  })
+  const [pea, wasCreated2] = await Vegetable.findOrCreate({
+  where: {
+    name: 'pea'
+  }
+  })
+  const [carrot, wasCreated3] = await Vegetable.findOrCreate({
+  where: {
+    name: 'carrot'
+  }
+  })
+
+  plot1.addVegetable(pea)
+  plot1.addVegetable(carrot)
+
+  const newPlot = await plot1.save() 
+  // Find all vegetables
+  const vegs = await Vegetable.findAll();
+  console.log(vegs.every(veg => veg instanceof Vegetable)); // true
+  console.log("All vegetabless:", JSON.stringify(vegs, null, 2));
+
+  await db.sync();
+  await db.close();
+} 
+catch (error) {
+  console.error('Unable to connect to the database:', error);
+  }
+}
+
+// read: findWhere
+
 
 // update: one
 
@@ -236,11 +345,19 @@ catch (error) {
 // delete
 
 
+// Uncomment to run an example
+
+// Assoctiation examples
 //oneToone();
 //oneTom();
 //mTom();
 
-create1toM();
-//read();
+// Magic method examples
+//create1toM();
+//create1To1();
+//createMtoM();
+//createBulkItems()
+readFindAll();
+//readFindWhere();
 //update();
 //del();
