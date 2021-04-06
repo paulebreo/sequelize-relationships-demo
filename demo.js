@@ -407,7 +407,7 @@ try {
     name: {type: Sequelize.STRING}
   })
 
-  Gardener.hasMany(Vegetable) 
+  Gardener.belongsToMany(Vegetable, { through: GardenerVegetable })
   Vegetable.belongsToMany(Gardener, { through: GardenerVegetable })
 
   // Create and save tables
@@ -447,25 +447,38 @@ try {
     name: 'corn'
   }
   })
+  
   gardener1.addVegetable(onion)
   gardener1.addVegetable(carrot)
   gardener1.addVegetable(tomato)
 
   gardener2.addVegetable(tomato)
   gardener2.addVegetable(corn)
-
+  
   const newGardener1 = await gardener1.save() 
   const newGardener2 = await gardener2.save()
   
-  const vegs1 = await Gardener.findAll({
+  const vegs = await Gardener.findAll({
     include:[{
       model: Vegetable
     }
     ]
   })
 
-  console.log(vegs1.every(veg => veg instanceof Vegetable)); // true
-  console.log("All vegetabless:", JSON.stringify(vegs1, null, 2));
+  const gardeners = await Vegetable.findAll({
+    include:[{
+      model: Gardener,
+      attributes:['name']
+    }]
+  })
+  
+  
+  console.log(vegs.every(veg => veg instanceof Vegetable)); // true
+  console.log("All vegetables:", JSON.stringify(vegs, null, 2));
+
+
+  console.log(gardeners.every(gar => gar instanceof Gardener)); // true
+  console.log("All gardeners:", JSON.stringify(gardeners, null, 2));
 
   await db.sync();
   await db.close();
