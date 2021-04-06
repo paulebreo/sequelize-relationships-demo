@@ -392,11 +392,125 @@ catch (error) {
   }
 }
 
-// update: one
+// update
+async function updateDemo() {
+try {
+  
+  const Vegetable = db.define('vegetable', {
+    name: {type: Sequelize.STRING}
+  })
+  const Plot = db.define('plot', {
+    name: {type: Sequelize.STRING}
+  })
 
-// update: many
+
+  Plot.hasMany(Vegetable) 
+  Vegetable.belongsTo(Plot)
+
+  await db.authenticate();
+  console.log('Connection has been established successfully.');
+  await db.sync({force: true, logging: true});
+
+  // Create items
+  const [plot1, wasCreated1] = await Plot.findOrCreate({
+  where: {
+    name: 'gardener1'
+  }
+  })
+  const [pea, wasCreated2] = await Vegetable.findOrCreate({
+  where: {
+    name: 'pea'
+  }
+  })
+  const [carrot, wasCreated3] = await Vegetable.findOrCreate({
+  where: {
+    name: 'carrot'
+  }
+  })
+
+  plot1.addVegetable(pea)
+  plot1.addVegetable(carrot)
+
+  const newPlot = await plot1.save() 
+  
+  // Update
+  await Vegetable.update({ name: 'onion' }, {
+    where: {
+      name: 'carrot'
+    }
+  });
+
+  const vegs = await Vegetable.findAll()
+  console.log(vegs.every(veg => veg instanceof Vegetable)); // true
+  console.log("All vegetabless:", JSON.stringify(vegs, null, 2));
+
+  await db.sync();
+  await db.close();
+} 
+catch (error) {
+  console.error('Unable to connect to the database:', error);
+  }
+}
 
 // delete
+async function deleteDemo() {
+try {
+  
+  const Vegetable = db.define('vegetable', {
+    name: {type: Sequelize.STRING}
+  })
+  const Plot = db.define('plot', {
+    name: {type: Sequelize.STRING}
+  })
+
+
+  Plot.hasMany(Vegetable) 
+  Vegetable.belongsTo(Plot)
+
+  await db.authenticate();
+  console.log('Connection has been established successfully.');
+  await db.sync({force: true, logging: true});
+
+  // Create items
+  const [plot1, wasCreated1] = await Plot.findOrCreate({
+  where: {
+    name: 'gardener1'
+  }
+  })
+  const [pea, wasCreated2] = await Vegetable.findOrCreate({
+  where: {
+    name: 'pea'
+  }
+  })
+  const [carrot, wasCreated3] = await Vegetable.findOrCreate({
+  where: {
+    name: 'carrot'
+  }
+  })
+
+  plot1.addVegetable(pea)
+  plot1.addVegetable(carrot)
+
+  const newPlot = await plot1.save() 
+  
+  // Update
+  await Vegetable.destroy({
+    where: {
+      name: 'pea'
+    }
+  });
+
+  const vegs = await Vegetable.findAll()
+  console.log(vegs.every(veg => veg instanceof Vegetable)); // true
+  console.log("All vegetabless:", JSON.stringify(vegs, null, 2));
+
+  await db.sync();
+  await db.close();
+} 
+catch (error) {
+  console.error('Unable to connect to the database:', error);
+  }
+}
 
 
 // Uncomment to run an example
@@ -412,6 +526,6 @@ catch (error) {
 //createMtoM();
 //createBulkItems()
 //readFindAll();
-readFindWhere();
-//update();
-//del();
+//readFindWhere();
+//updateDemo();
+deleteDemo();
