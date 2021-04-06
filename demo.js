@@ -472,12 +472,8 @@ try {
     }]
   })
   
-  
-  console.log(vegs.every(veg => veg instanceof Vegetable)); // true
   console.log("All vegetables:", JSON.stringify(vegs, null, 2));
 
-
-  console.log(gardeners.every(gar => gar instanceof Gardener)); // true
   console.log("All gardeners:", JSON.stringify(gardeners, null, 2));
 
   await db.sync();
