@@ -392,6 +392,89 @@ catch (error) {
   }
 }
 
+// read: findAll2 - many-to-many example
+async function readFindAll2() {
+try {
+  
+  const Vegetable = db.define('vegetable', {
+    name: {type: Sequelize.STRING}
+  })
+  const Gardener = db.define('gardener', {
+    name: {type: Sequelize.STRING}
+  })
+
+  const GardenerVegetable =db.define('gardenervegetable', {
+    name: {type: Sequelize.STRING}
+  })
+
+  Gardener.hasMany(Vegetable) 
+  Vegetable.belongsToMany(Gardener, { through: GardenerVegetable })
+
+  // Create and save tables
+  await db.authenticate();
+  console.log('Connection has been established successfully.');
+  await db.sync({force: true, logging: true});
+
+  // Create items
+  const [gardener1, wasCreated1] = await Gardener.findOrCreate({
+  where: {
+    name: 'gardener1'
+  }
+  })
+
+    const [gardener2, wasCreated1b] = await Gardener.findOrCreate({
+  where: {
+    name: 'gardener2'
+  }
+  })
+    const [onion, wasCreated2] = await Vegetable.findOrCreate({
+  where: {
+    name: 'onion'
+  }
+  })
+  const [carrot, wasCreated3] = await Vegetable.findOrCreate({
+  where: {
+    name: 'carrot'
+  }
+  })
+  const [tomato, wasCreated4] = await Vegetable.findOrCreate({
+  where: {
+    name: 'tomato'
+  }
+  })
+  const [corn, wasCreated5] = await Vegetable.findOrCreate({
+  where: {
+    name: 'corn'
+  }
+  })
+  gardener1.addVegetable(onion)
+  gardener1.addVegetable(carrot)
+  gardener1.addVegetable(tomato)
+
+  gardener2.addVegetable(tomato)
+  gardener2.addVegetable(corn)
+
+  const newGardener1 = await gardener1.save() 
+  const newGardener2 = await gardener2.save()
+  
+  const vegs1 = await Gardener.findAll({
+    include:[{
+      model: Vegetable
+    }
+    ]
+  })
+
+  console.log(vegs1.every(veg => veg instanceof Vegetable)); // true
+  console.log("All vegetabless:", JSON.stringify(vegs1, null, 2));
+
+  await db.sync();
+  await db.close();
+} 
+catch (error) {
+  console.error('Unable to connect to the database:', error);
+  }
+}
+
 // update
 async function updateDemo() {
 try {
@@ -527,5 +610,6 @@ catch (error) {
 //createBulkItems()
 //readFindAll();
 //readFindWhere();
+readFindAll2();
 //updateDemo();
-deleteDemo();
+//deleteDemo();
